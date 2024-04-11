@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Page</title>
+  <style>
+    .correct-answer {
+      text-decoration: underline;
+      color: green;
+    }
+    .incorrect-answer {
+      text-decoration: underline;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h2>Welcome User</h2>
+  
+  <h3>Take Quiz</h3>
+  <div id="quizQuestions"></div>
+  <button onclick="submitQuiz()">Submit Quiz</button>
+  <div id="quizResult" style="display:none;"></div>
+
+  <script>
+    // quiz ma halxa. local storage permanent khalko cache jasto haina
+    let quiz = JSON.parse(localStorage.getItem('quiz')) || [];
+
+    function displayQuizQuestions() {
+  // Select the container element where quiz questions will be displayed
+  let quizQuestionsDiv = document.getElementById('quizQuestions');
+
+  // Clear the previous content inside the container
+  quizQuestionsDiv.innerHTML = '';
+
+  // Iterate through each question in the quiz array
+  quiz.forEach((item, index) => {
+    // Create a new <div> element to hold the question and input field
+    let div = document.createElement('div');
+
+    // Set the HTML content for the <div> element
+    div.innerHTML = `<strong>Question ${index + 1}:</strong> ${item.question}<br>
+                    <input type="text" id="answer${index}" placeholder="Your Answer" style="display:block"><br>`;
+
+    // Append the <div> element to the container
+    quizQuestionsDiv.appendChild(div);
+  });
+}
+
+
+    // Display quiz questions
+    displayQuizQuestions();
+
+    // Function to submit quiz
+    function submitQuiz() {
+      let userAnswers = [];
+      let correctAnswers = [];
+      let incorrectAnswers = [];
+      for (let i = 0; i < quiz.length; i++) {
+        let answerInput = document.getElementById(`answer${i}`);
+        let userAnswer = answerInput.value.trim();
+        if (userAnswer) {
+          userAnswers.push(userAnswer.toLowerCase()); // Convert answers to lowercase for case-insensitive comparison
+          if (userAnswer.toLowerCase() === quiz[i].answer.toLowerCase()) {
+            correctAnswers.push(i);
+          } else {
+            incorrectAnswers.push(i);
+          }
+        } else {
+          alert(`Please answer question ${i + 1}`);
+          return;
+        }
+      }
+      
+      // Display quiz result
+      let quizResultDiv = document.getElementById('quizResult');
+      quizResultDiv.style.display = 'block';
+      let resultHTML = `Your score: ${correctAnswers.length}/${quiz.length}<br>`;
+      resultHTML += `<strong>Correct Answers:</strong><br>`;
+      quiz.forEach((item, index) => {
+        if (correctAnswers.includes(index)) {
+          resultHTML += `<div>${item.question}<span class="correct-answer"> - ${item.answer}</span></div>`;
+        }
+      });
+      if (incorrectAnswers.length > 0) {
+        resultHTML += `<strong>Incorrect Answers:</strong><br>`;
+        incorrectAnswers.forEach(index => {
+          resultHTML += `<div>${quiz[index].question}<span class="incorrect-answer"> - ${quiz[index].answer}</span></div>`;
+        });
+      }
+      quizResultDiv.innerHTML = resultHTML;
+    }
+  </script>
+</body>
+</html>
